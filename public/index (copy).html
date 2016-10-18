@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="application-name" content="BlockchainInsurance"/>
+    <meta name="msapplication-TileColor" content="#F3F3E1" />
+    <meta name="msapplication-TileImage" content="images/mstile-144x144.png" />
+    <meta name="msapplication-square70x70logo" content="images/mstile-70x70.png" />
+    <meta name="msapplication-square150x150logo" content="images/mstile-150x150.png" />
+    <meta name="msapplication-wide310x150logo" content="images/mstile-310x150.png" />
+    <meta name="msapplication-square310x310logo" content="images/mstile-310x310.png" />
+
+    <link rel="apple-touch-icon-precomposed" sizes="57x57" href="images/apple-touch-icon-57x57.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/apple-touch-icon-114x114.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/apple-touch-icon-72x72.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="images/apple-touch-icon-144x144.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="60x60" href="images/apple-touch-icon-60x60.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="120x120" href="images/apple-touch-icon-120x120.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="76x76" href="images/apple-touch-icon-76x76.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="images/apple-touch-icon-152x152.png" />
+
+    <link rel="icon" type="image/png" href="images/favicon-196x196.png" sizes="196x196" />
+    <link rel="icon" type="image/png" href="images/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16" />
+    <link rel="icon" type="image/png" href="images/favicon-128.png" sizes="128x128" />
+
+    <title>Prototype Insurance Blockchain</title>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <script src="js/jquery.js"></script>
+</head>
+<body>
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/">Prototype Insurance Blockchain</a>
+      </div>
+    </div><!-- /.container-fluid -->
+  </nav>
+
+
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12 col-sm-6 col-md-6">
+        <div class="page-header">
+          <h2>Покупка полиса<br><small>Введите данные клиента</small></h2>
+        </div>
+        <form name="public">
+          <div class="form-group">
+            <label for="passphrase">Passphrase</label>
+            <input type="password" class="form-control" id="passphrase" placeholder="Your Passphrase (optional)">
+          </div>
+          <div class="form-group">
+            <label for="entry">Entry</label>
+            <textarea rows="1" cols="50" type="text" class="form-control" id="entry" maxlength="1000" placeholder="Your Entry (required)"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="fio">ФИО клиента</label>
+            <textarea rows="1" cols="50" type="text" class="form-control" id="fio" maxlength="200" placeholder="ФИО клиента (required)"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="fio">Паспорт клиента</label>
+            <textarea rows="1" cols="50" type="text" class="form-control" id="passport" maxlength="50" placeholder="Паспорт клиента (required)"></textarea>
+          </div>
+          <button type="button" id="submit" class="col-xs-12 col-sm-12 col-md-12 btn btn-default">Купить полис</button>
+        </form>
+        <p id="submitted"></p>
+      </div>
+
+      <div class="col-xs-12 col-sm-6 col-md-6">
+        <div class="page-header">
+          <h2><img src="images/icon.png"> Quick Guide<br><small>A quick guide on how to use this dapp.</small></h2>
+        </div>
+        <p>- Entries get reloaded every 10 seconds.</p>
+        <p>- Maximum number of characters is 1000.</p>
+        <p>- Entry listing is restricted to 20 entries at a time.</p>
+        <p>- Entering a passphrase is optional and will default to "guestbook".</p>
+        <p>- Transaction fee is 0 LISK (for testing purposes only).</p>
+
+        <p>
+          <br>Want to learn hown to write your own Lisk dapps?
+          <br>Then head on over to our <a href="https://lisk.io/documentation?i=lisk-docs/README"><strong>documentation page</strong></a> to get yourself started!
+        </p>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <div class="container" id="entryOverview"></div>
+
+  <script type="text/javascript">
+    var url = window.location.href;
+    var parts = url.split('/');
+    var dappId = parts[parts.indexOf('dapps') + 1];
+    var recipient = "9656600697829963790L"; // Max' account
+
+    function reloadPage() {
+     window.location.reload();
+    }
+
+    $("#submit").click(function () {
+        if (document.public.passphrase.value == "")
+        {
+            document.public.passphrase.value = "guestbook";
+        }
+
+        if (document.public.entry.value == "")
+        {
+            alert("You didn't type an entry!");
+            return;
+        }
+
+        jQuery.ajax({
+            url: '/api/dapps/' + dappId + '/api/entries/add',
+            type: 'PUT',
+            dataType: 'json',
+            data: { "recipientId": recipient, "entry": document.public.entry.value, "secret": document.public.passphrase.value }
+        }).done(function (resp) {
+           // alert("Your entry will be processed in ~10 seconds");
+            window.location.reload();
+        });
+    });
+
+    function getEntries() {
+        jQuery.get("/api/dapps/" + dappId + "/api/entries/list?recipientId=" + recipient, function (data) {
+            $("#entryOverview").html('');
+            if (data.error == "Dapp not ready") {
+                alert("Dapp offline! The master node which computes your instance of this dapp is offline. Please reload the window!");
+            }
+
+            jQuery.each(data.response.entries, function (key, value) {
+                if (value.senderId == "14064670321469355749L") {
+                    value.senderId = "Anonymous";
+                }
+                var numberOfEntries = data.response.entries.length - 20;
+                if (key < numberOfEntries) {
+                    return;
+                }
+                key = key + 1;
+                $("#entryOverview")
+                        .prepend("<table class='table table-bordered'><tr><td class='col-md-1'><strong>#" + key + "</strong></td><td class='col-md-7'><strong>Sender:</strong> " + value.senderId + "</td><td class='col-md-4'><strong>ID:</strong> " + value.blockId.substring(0, 16) + "</td></tr><tr><td colspan='4'>" + value.asset.entry.replace(/[<>]/g,'') + "</td></tr></table>");
+            });
+        });
+    }
+
+    getEntries();
+    setInterval(function () {
+        getEntries();
+    }, 10000);
+  </script>
+</body>
+</html>
